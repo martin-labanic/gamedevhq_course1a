@@ -15,12 +15,16 @@ public class Player : MonoBehaviour {
     
     [SerializeField] private float _speed = 10.0f;
     [SerializeField] private float _speedPowerupModifier = 2.0f;
+    [SerializeField] private bool _isBoostActive = false;
+    [SerializeField] private float _speedBoostModifier = 3.0f;
+
     
     [SerializeField] private GameObject _projectilePrefab;
     [SerializeField] private GameObject _tripleShotPrefab;
     [SerializeField] private bool _isTripleShotActive = false;
     [SerializeField] private bool _isSpeedActive = false;
     [SerializeField] private bool _isShieldActive = false;
+
 
     [SerializeField] private int _score = 0;
     private UIManager _uiManager;
@@ -44,7 +48,7 @@ public class Player : MonoBehaviour {
         transform.position = Vector3.zero;
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
         if (_uiManager == null) {
-            Debug.Log("Failed to find ui manager.");
+            Debug.Log("Player.Start: UI manage is null.");
         } else {
             _uiManager.UpdateScoreUI(_score);  
             _uiManager.UpdateLivesUI(_lives);
@@ -53,7 +57,7 @@ public class Player : MonoBehaviour {
         _shieldVisualizer.SetActive(false);
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         if (_spawnManager == null) {
-            Debug.Log("SPAWN MANAGER: SHE NULL, MAN.");
+            Debug.LogError("Player.Start: Spawn manager is null.");
         }
     }
     
@@ -62,6 +66,22 @@ public class Player : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space)) {
             ShootProjectile();
         }
+        
+        if (Input.GetKeyDown(KeyCode.LeftShift)) {
+            EnableSpeedBoost();
+        } else if (Input.GetKeyUp(KeyCode.LeftShift)) {
+            DisableSpeedBoost();
+        }
+    }
+
+    private void EnableSpeedBoost() {
+        _isBoostActive = true;
+        _speed *= _speedBoostModifier;
+    }
+
+    private void DisableSpeedBoost() {
+        _isBoostActive = false;
+        _speed /= _speedBoostModifier;
     }
 
     bool CanShootProjectile() {
@@ -72,13 +92,11 @@ public class Player : MonoBehaviour {
         if (CanShootProjectile()) {
             if (_isTripleShotActive) {
                 Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);
-            }
-            else {
+            } else {
                 Instantiate(_projectilePrefab, transform.position + new Vector3(0, 0.95f, 0), Quaternion.identity);
             }
 
             _nextFire = Time.time + _fireRate;
-            
             _audioSource.PlayOneShot(_projectileAudioClip);
         }
     }
@@ -90,15 +108,15 @@ public class Player : MonoBehaviour {
                 break;
             case Powerup.TripleShot:
                 _audioSource.PlayOneShot(_powerupAudioClip);
-                EnableTripleShot();
+                EnableTripleShotPowerup();
                 break;
             case Powerup.Speed:
                 _audioSource.PlayOneShot(_powerupAudioClip);
-                EnableSpeed();
+                EnableSpeedPowerup();
                 break;
             case Powerup.Shield:
                 _audioSource.PlayOneShot(_powerupAudioClip);
-                EnableShield();
+                EnableShieldPowerup();
                 break;
             default:
                 Debug.Log("collectPowerup: Unknown powerup id " + (int) id);
@@ -106,36 +124,36 @@ public class Player : MonoBehaviour {
         }
     }
 
-    public void EnableTripleShot() {
+    public void EnableTripleShotPowerup() {
         _isTripleShotActive = true;
-        StartCoroutine(DisableTripleShot());
+        StartCoroutine(DisableTripleShotPowerup());
     }
 
-    private IEnumerator DisableTripleShot() {
+    private IEnumerator DisableTripleShotPowerup() {
         yield return new WaitForSeconds(5f);
         _isTripleShotActive = false;
         
     }
 
-    public void EnableSpeed() {
+    public void EnableSpeedPowerup() {
         _isSpeedActive = true;
         _speed *= _speedPowerupModifier;
-        StartCoroutine(DisableSpeed());
+        StartCoroutine(DisableSpeedPowerup());
     }
 
-    private IEnumerator DisableSpeed() {
+    private IEnumerator DisableSpeedPowerup() {
         yield return new WaitForSeconds(5f);
         _speed /= _speedPowerupModifier;
         _isSpeedActive = false;
     }
     
-    public void EnableShield() {
+    public void EnableShieldPowerup() {
         _isShieldActive = true;
         _shieldVisualizer.SetActive(true);
         _shieldLives = 1;
     }
 
-    public void DisableShield() {
+    public void DisableShieldPowerup() {
         _shieldVisualizer.SetActive(false);
         _isShieldActive = false;
     }
@@ -176,7 +194,7 @@ public class Player : MonoBehaviour {
         if (_isShieldActive) {
             _shieldLives--;
             if (_shieldLives <= 0) {
-                DisableShield();   
+                DisableShieldPowerup();   
             }
         } else {
             _lives--;
