@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
 public class Player : MonoBehaviour {
+    [SerializeField] private const int MAX_SHIELD_LIVES = 3;
+    
     [SerializeField] private int _lives = 3;
     [SerializeField] private int _shieldLives = 0;
     [SerializeField] private GameObject _shieldVisualizer;
@@ -150,7 +152,8 @@ public class Player : MonoBehaviour {
     public void EnableShieldPowerup() {
         _isShieldActive = true;
         _shieldVisualizer.SetActive(true);
-        _shieldLives = 1;
+        _shieldLives = MAX_SHIELD_LIVES;
+        _shieldVisualizer.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
     }
 
     public void DisableShieldPowerup() {
@@ -195,6 +198,9 @@ public class Player : MonoBehaviour {
             _shieldLives--;
             if (_shieldLives <= 0) {
                 DisableShieldPowerup();   
+            } else {
+                float shieldTransparency = _shieldLives / (float)MAX_SHIELD_LIVES;
+                _shieldVisualizer.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, shieldTransparency);
             }
         } else {
             _lives--;
