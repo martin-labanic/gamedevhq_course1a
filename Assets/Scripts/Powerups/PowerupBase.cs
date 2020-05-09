@@ -7,12 +7,19 @@ namespace Powerups {
         protected virtual Powerup Powerup => Powerup.None;
         
         [SerializeField] private float _speed = 3.0f;
-        [SerializeField] private Vector3 direction = Vector3.down;
+        [SerializeField] private Vector3 _direction = Vector3.down;
         
+        /// <summary>
+        /// 
+        /// </summary>
         void Update() {
             HandleMovement();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
         private void OnTriggerEnter2D(Collider2D other) {
             if (other.transform.CompareTag("Player")) {
                 var player = other.GetComponent<Player>();
@@ -24,11 +31,17 @@ namespace Powerups {
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         void HandleMovement() {
-            transform.Translate(direction * (_speed * Time.deltaTime));
+            transform.Translate(_direction * (_speed * Time.deltaTime));
             CheckBoundaries();
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
         void CheckBoundaries() {
             if (transform.position.y < -10.0f) {
                 Destroy(gameObject);

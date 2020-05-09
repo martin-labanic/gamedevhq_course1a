@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour { // TODO This is under-utilized; refactor logic to use this more.
     [SerializeField] private bool isRunning = false;
     [SerializeField] private bool _isGameOver = false;
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool IsGameOver {
         get => _isGameOver;
         set => _isGameOver = value;

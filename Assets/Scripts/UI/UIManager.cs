@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour { // TODO There has to be a better way to
     [SerializeField] private Text _scoreText;
     [SerializeField] private Text _gameOverText;
     [SerializeField] private Text _gameRestartText;
+    [SerializeField] private Text _ammoCountText;
     [SerializeField] private Image _livesDisplayImage;
     [SerializeField] private Sprite[] _livesSprites;
 
@@ -23,14 +24,31 @@ public class UIManager : MonoBehaviour { // TODO There has to be a better way to
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="score"></param>
     public void UpdateScoreUI(int score) {
         _scoreText.text = "Score: " + score;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="lives"></param>
     public void UpdateLivesUI(int lives) {
-        _livesDisplayImage.sprite = _livesSprites[lives];
+        if (lives >= 0 && lives < _livesSprites.Length) {
+            _livesDisplayImage.sprite = _livesSprites[lives];    
+        }
     }
 
+    public void UpdateAmmoUI(int ammo) {
+        _ammoCountText.text = "x" + ammo;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void DisplayGameOver() {
         _gameManager.IsGameOver = true;
         _gameOverText.gameObject.SetActive(true);
@@ -38,11 +56,18 @@ public class UIManager : MonoBehaviour { // TODO There has to be a better way to
         StartCoroutine(FlickerText(_gameOverText));
     }
 
-    private IEnumerator FlickerText(Text text) {
+    /// <summary>
+    ///
+    /// Note: Potential for a bug here where the run time is stopped when its blank. Mitigated atm because the scene reloads.
+    /// </summary>
+    /// <param name="textObj"></param>
+    /// <returns></returns>
+    private IEnumerator FlickerText(Text textObj) {
+        String originalText = textObj.text;
         while (true) {
-            _gameOverText.text = "GAME OVER";
+            textObj.text = originalText;
             yield return new WaitForSeconds(0.75f);
-            _gameOverText.text = "";
+            textObj.text = "";
             yield return new WaitForSeconds(0.1f);
         }
     }
